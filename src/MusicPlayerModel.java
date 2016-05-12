@@ -1,5 +1,7 @@
 /**
- * Created by Connor on 5/11/2016.
+ *
+ *
+ * @author connoryork (cxy1054@rit.edu)
  */
 public class MusicPlayerModel {
     public static void main(String[] args) {
