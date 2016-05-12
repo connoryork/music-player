@@ -1,5 +1,6 @@
 import javafx.application.Application;
 import javafx.beans.Observable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -32,6 +33,8 @@ public class MusicPlayerGUI extends Application implements Observer {
 
         // create bottom control buttons
         HBox bot = new HBox();
+        bot.setSpacing(10);
+        bot.setPadding(new Insets(10));
         bot.setAlignment(Pos.CENTER);
 
         // rewind button
