@@ -45,7 +45,13 @@ public class MusicPlayerModel {
         clip.start();
     }
 
-    //stop stops the music player
+    public void start() {
+        if (clip != null && !clip.isRunning()) {
+            clip.start();
+        }
+    }
+
+    //stop stops the music player, retains
     public void stop() { if (clip.isRunning()) clip.stop(); }
 
     //a pesudo delete
