@@ -7,5 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="jl1.0.1" level="project" />
+    <orderEntry type="library" name="mp3spi1.9.5" level="project" />
+    <orderEntry type="library" name="tritonus_share" level="project" />
   </component>
 </module>

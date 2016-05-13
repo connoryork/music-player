@@ -1,11 +1,15 @@
 import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -20,8 +24,11 @@ import java.util.Observer;
  */
 public class MusicPlayerGUI extends Application implements Observer {
 
-    private static final int DEFAULT_PADDING = 10;
-    private static final int DEFAULT_SPACING = 5;
+    private static final int DEFAULT_PADDING = 5;
+    private static final int DEFAULT_SPACING = 3;
+    private static final int DEFAULT_HEIGHT = 80;
+    private static final int DEFAULT_BUTTON_DIMENSION = 20;
+    private static final int DEFAULT_WINDOW_DIMESION = 0;
 
     private static final int MIN_VOLUME = 0;
     private static final int MAX_VOLUME = 100;
@@ -64,9 +71,10 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     private BorderPane buildRoot() {
         BorderPane bp = new BorderPane();
+        bp.setPrefSize(350, 80);
         bp.setPadding(new Insets(DEFAULT_PADDING));
         bp.setCenter(buildCenter());
-        bp.setBottom(buildVolumeSlider());
+        bp.setRight(buildVolumeSlider());
         return bp;
     }
 
@@ -92,6 +100,11 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     private Button buildRewind() {
         Button rewind = new Button();
+        setImage(rewind, "rewind.png");
+        //rewind.setPrefSize(DEFAULT_DIMENSION,DEFAULT_DIMENSION);
+        rewind.setOnAction(e -> {
+            // TODO
+        });
         return rewind;
     }
 
@@ -102,6 +115,16 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     private ToggleButton buildPlayPause() {
         ToggleButton play = new ToggleButton();
+        setImage(play, "play.png");
+        play.setOnAction(e -> {
+            if (play.isSelected()) {
+                setImage(play, "pause.png");
+                // TODO play song
+            } else {
+                setImage(play, "play.png");
+                // TODO pause song
+            }
+        });
         return play;
     }
 
@@ -112,11 +135,23 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     private Button buildNext() {
         Button next = new Button();
+        setImage(next, "fastforward.png");
+        next.setOnAction(e -> {
+            // TODO play next song
+        });
         return next;
+    }
+
+    private void setImage(ButtonBase b, String filename) {
+        Image image = new Image(getClass().getResourceAsStream("resources/" + filename));
+        b.setGraphic(new ImageView(image));
     }
 
     private Slider buildVolumeSlider() {
         Slider slider = new Slider(MIN_VOLUME, MAX_VOLUME, 50); // replace starting value with current volume
+        slider.setOrientation(Orientation.VERTICAL);
+        slider.setPadding(new Insets(DEFAULT_PADDING));
+        slider.setMaxHeight(DEFAULT_HEIGHT);
         return slider;
     }
 
