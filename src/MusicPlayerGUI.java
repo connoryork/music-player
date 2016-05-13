@@ -25,13 +25,15 @@ import java.util.Observer;
 public class MusicPlayerGUI extends Application implements Observer {
 
     private static final int DEFAULT_PADDING = 5;
-    private static final int DEFAULT_SPACING = 3;
+    private static final int DEFAULT_SPACING = 10;
     private static final int DEFAULT_HEIGHT = 80;
     private static final int DEFAULT_BUTTON_DIMENSION = 20;
     private static final int DEFAULT_WINDOW_DIMESION = 0;
 
     private static final int MIN_VOLUME = 0;
     private static final int MAX_VOLUME = 100;
+
+    private MusicPlayerModel model;
 
     /**
      * Launches the GUI
@@ -51,6 +53,7 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
+        //this.model = new MusicPlayerModel();
         Scene s = new Scene(buildRoot());
         primaryStage.initStyle(StageStyle.UTILITY);
         primaryStage.setScene(s);
@@ -80,6 +83,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     }
 
     /**
+     * Builds HBox and corresponding buttons
      *
      * @return center buttons in a HBox
      */
@@ -87,7 +91,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         HBox box = new HBox();
         box.setSpacing(DEFAULT_SPACING);
         box.setPadding(new Insets(DEFAULT_PADDING));
-        box.setAlignment(Pos.CENTER);
+        box.setAlignment(Pos.TOP_CENTER);
         box.getChildren().add(buildRewind());
         box.getChildren().add(buildPlayPause());
         box.getChildren().add(buildNext());
@@ -102,7 +106,6 @@ public class MusicPlayerGUI extends Application implements Observer {
     private Button buildRewind() {
         Button rewind = new Button();
         setImage(rewind, "rewind.png");
-        //rewind.setPrefSize(DEFAULT_DIMENSION,DEFAULT_DIMENSION);
         rewind.setOnAction(e -> {
             // TODO
         });
@@ -120,10 +123,10 @@ public class MusicPlayerGUI extends Application implements Observer {
         play.setOnAction(e -> {
             if (play.isSelected()) {
                 setImage(play, "pause.png");
-                // TODO play song
+                model.play();
             } else {
                 setImage(play, "play.png");
-                // TODO pause song
+                model.stop();
             }
         });
         return play;
