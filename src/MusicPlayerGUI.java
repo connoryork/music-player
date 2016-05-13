@@ -1,8 +1,8 @@
 import javafx.application.Application;
-import javafx.beans.Observable;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -12,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -26,9 +27,9 @@ public class MusicPlayerGUI extends Application implements Observer {
 
     private static final int DEFAULT_PADDING = 5;
     private static final int DEFAULT_SPACING = 10;
-    private static final int DEFAULT_HEIGHT = 80;
-    private static final int DEFAULT_BUTTON_DIMENSION = 20;
-    private static final int DEFAULT_WINDOW_DIMESION = 0;
+    private static final int DEFAULT_SLIDER_HEIGHT = 80;
+    private static final int DEFAULT_WINDOW_HEIGHT = 0;
+    private static final int DEFAULT_WINDOW_WIDTH = 0;
 
     private static final int MIN_VOLUME = 0;
     private static final int MAX_VOLUME = 100;
@@ -45,6 +46,12 @@ public class MusicPlayerGUI extends Application implements Observer {
         launch(args);
     }
 
+    @Override
+    public void init() {
+        Parameters params = getParameters();
+        this.model = new MusicPlayerModel(params.getRaw().get(0));
+    }
+
     /**
      * JavaFX start method. Builds and displays the GUI.
      *
@@ -53,13 +60,20 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //this.model = new MusicPlayerModel();
         Scene s = new Scene(buildRoot());
         primaryStage.initStyle(StageStyle.UTILITY);
         primaryStage.setScene(s);
         primaryStage.setResizable(false);
         primaryStage.setAlwaysOnTop(true);
         primaryStage.show();
+
+        Rectangle2D screen = Screen.getPrimary().getVisualBounds();
+        //primaryStage.setX((screen.getWidth() - primaryStage.getWidth()) / 2);
+        //primaryStage.setY((screen.getHeight() - primaryStage.getHeight()) / 4);
+        primaryStage.setX(screen.getWidth() - primaryStage.getWidth());
+        System.out.println(screen.getHeight());
+        System.out.println(primaryStage.getHeight());
+        primaryStage.setY(screen.getHeight() - primaryStage.getHeight());
     }
 
     /*******************************************************
@@ -155,7 +169,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         Slider slider = new Slider(MIN_VOLUME, MAX_VOLUME, 50); // replace starting value with current volume
         slider.setOrientation(Orientation.VERTICAL);
         slider.setPadding(new Insets(DEFAULT_PADDING));
-        slider.setMaxHeight(DEFAULT_HEIGHT);
+        slider.setMaxHeight(DEFAULT_SLIDER_HEIGHT);
         return slider;
     }
 
