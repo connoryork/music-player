@@ -38,6 +38,7 @@ public class MusicPlayerGUI extends Application implements Observer {
      *
      * @param args not used
      */
+    
     public static void main(String[] args) {
         launch(args);
     }
