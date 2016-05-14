@@ -50,8 +50,8 @@ public class MusicPlayerGUI extends Application implements Observer {
     public void init() {
         Parameters params = getParameters();
         this.model = new MusicPlayerModel("resources/" + params.getRaw().get(0));
-        this.MIN_VOLUME = (int) this.model.getMinVolume();
-        this.MAX_VOLUME = (int) this.model.getMaxVolume();
+        MIN_VOLUME = (int) this.model.getMinVolume();
+        MAX_VOLUME = (int) this.model.getMaxVolume();
     }
 
     /**
@@ -120,9 +120,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     private Button buildRewind() {
         Button rewind = new Button();
         setImage(rewind, "rewind.png");
-        rewind.setOnAction(e -> {
-            // TODO
-        });
+        rewind.setOnAction(e -> this.model.rewindToStart());
         return rewind;
     }
 
@@ -177,7 +175,8 @@ public class MusicPlayerGUI extends Application implements Observer {
      * @return Slider which controls volume
      */
     private Slider buildVolumeSlider() {
-        Slider slider = new Slider(MIN_VOLUME, MAX_VOLUME, 50); // replace starting value with current volume
+        int half = (MAX_VOLUME + MIN_VOLUME)/2;
+        Slider slider = new Slider(half, MAX_VOLUME, (MAX_VOLUME + half)/2); // replace starting value with current volume
         slider.setOrientation(Orientation.VERTICAL);
         slider.setPadding(new Insets(DEFAULT_PADDING));
         slider.setMaxHeight(DEFAULT_SLIDER_HEIGHT);
