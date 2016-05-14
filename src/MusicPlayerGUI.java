@@ -151,6 +151,7 @@ public class MusicPlayerGUI extends Application implements Observer {
                 if (!this.model.isRunning()) { //paused
                     if (this.model.atEnd()) {
                         this.model.setSongPosition(0);
+                        this.songSlider.setValue(0);
                         setImage(play, "pause.png");
                         this.model.start();
                     }
@@ -295,6 +296,10 @@ public class MusicPlayerGUI extends Application implements Observer {
             setImage(this.play, "pause.png");
         else
             setImage(this.play, "play.png");
+        if (this.model.getClipCurrentValue() == this.model.getClipLength()) {
+            setImage(this.play, "play.png");
+            this.songSlider.setValue(0);
+        }
         // update slider based on current song position
         this.songSlider.setValue(this.model.getClipCurrentValue());
     }

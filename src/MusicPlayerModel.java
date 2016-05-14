@@ -1,3 +1,5 @@
+import javafx.concurrent.Task;
+
 import javax.sound.sampled.*;
 import java.util.Observable;
 /**
@@ -94,7 +96,21 @@ public class MusicPlayerModel extends Observable {
             this.clip = AudioSystem.getClip();
             this.clip.open(decodedStream);
             this.clip.setFramePosition(0);
-
+            Task<MusicPlayerModel> updater = new Task<MusicPlayerModel>(this) {
+                @Override
+                protected MusicPlayerModel call() throws Exception {
+                    while (this.clip.getFramePosition() != this.model.clip.getFrameLength()) {
+                        try {
+                            this.wait(1);
+                        } catch (InterruptedException ie) {
+                            System.out.println(ie.getMessage());
+                        }
+                        this.model.announceChanges();
+                    }
+                    return null;
+                }
+            };
+            new Thread(updater).start();
         } catch (Exception e) {
             System.out.println("Failed to load audio.");
         }
@@ -241,7 +257,7 @@ public class MusicPlayerModel extends Observable {
     /**
      * Periodically notifies the GUI to update based on changes in the model.
      */
-    private class Updater extends Thread {
+    private class Updater extends Task {
 
         /** Model for easy access */
         private MusicPlayerModel model;
@@ -253,7 +269,6 @@ public class MusicPlayerModel extends Observable {
          */
         public Updater(MusicPlayerModel model) {
             this.model = model;
-            this.start();
         }
 
         /**
@@ -262,14 +277,21 @@ public class MusicPlayerModel extends Observable {
          */
         @Override
         public void run() {
-            while (this.model.clip.getFramePosition() != this.model.clip.getFrameLength()) {
-                try {
-                    wait(1);
-                } catch (InterruptedException ie) {
-                    System.out.println(ie.getMessage());
+            synchronized (this) {
+                while (this.model.clip.getFramePosition() != this.model.clip.getFrameLength()) {
+                    try {
+                        this.wait(1);
+                    } catch (InterruptedException ie) {
+                        System.out.println(ie.getMessage());
+                    }
+                    this.model.announceChanges();
                 }
-                this.model.announceChanges();
             }
+        }
+
+        @Override
+        protected Object call() throws Exception {
+            return null;
         }
     }
 }
