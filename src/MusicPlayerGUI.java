@@ -75,6 +75,8 @@ public class MusicPlayerGUI extends Application implements Observer {
     public void start(Stage primaryStage) throws Exception {
         Scene s = new Scene(buildRoot(primaryStage));
         primaryStage.initStyle(StageStyle.UTILITY);
+        primaryStage.getIcons().add(new Image("resources/musicnotelarge.png"));
+        primaryStage.setTitle("No Song Selected ~ MusicPlayer");
         primaryStage.setScene(s);
         primaryStage.setResizable(false);
         primaryStage.setAlwaysOnTop(true);
@@ -116,8 +118,8 @@ public class MusicPlayerGUI extends Application implements Observer {
     private HBox buildCenter() {
         HBox box = new HBox();
         box.setSpacing(DEFAULT_SPACING);
-        box.setPadding(new Insets(DEFAULT_PADDING));
-        box.setAlignment(Pos.TOP_CENTER);
+        box.setPadding(new Insets(DEFAULT_PADDING,DEFAULT_PADDING,0,DEFAULT_PADDING));
+        box.setAlignment(Pos.CENTER);
         box.getChildren().add(buildRewind());
         box.getChildren().add(buildPlayPause());
         box.getChildren().add(buildNext());
@@ -199,7 +201,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     private Slider buildVolumeSlider() {
         Slider slider = new Slider(0, 0, 0);
         slider.setOrientation(Orientation.VERTICAL);
-        slider.setPadding(new Insets(DEFAULT_PADDING));
+        slider.setPadding(new Insets(DEFAULT_PADDING,DEFAULT_PADDING,0,DEFAULT_PADDING));
         slider.setMaxHeight(DEFAULT_SLIDER_HEIGHT);
         slider.valueProperty().addListener((observable, oldValue, newValue) -> {
             this.model.volumeChange(newValue.doubleValue());
@@ -226,6 +228,7 @@ public class MusicPlayerGUI extends Application implements Observer {
                 if (this.model.hasClip() && this.model.isRunning())
                     this.model.stop();
                 this.model.changeSong("resources/" + newSong.getName());
+                stage.setTitle(newSong.getName() + " ~ MusicPlayer");
                 MIN_VOLUME = (int) this.model.getMinVolume();
                 MAX_VOLUME = (int) this.model.getMaxVolume();
                 // update volume slider
@@ -272,6 +275,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         songSlider.setOnMouseExited(e -> popup.hide());
 
         this.songSlider = songSlider;
+        songSlider.setPadding(new Insets(DEFAULT_PADDING));
         songSlider.valueProperty().addListener(((observable, oldValue, newValue) -> {
             this.model.setSongPosition(newValue.intValue());
         }));
@@ -291,5 +295,7 @@ public class MusicPlayerGUI extends Application implements Observer {
             setImage(this.play, "pause.png");
         else
             setImage(this.play, "play.png");
+        // update slider based on current song position
+        this.songSlider.setValue(this.model.getClipCurrentValue());
     }
 }
