@@ -38,7 +38,7 @@ public class MusicPlayerGUI extends Application implements Observer {
      *
      * @param args not used
      */
-    
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -87,9 +87,9 @@ public class MusicPlayerGUI extends Application implements Observer {
     private BorderPane buildRoot() {
         BorderPane bp = new BorderPane();
         bp.setPrefSize(350, 80);
-        bp.setPadding(new Insets(DEFAULT_PADDING));
         bp.setCenter(buildCenter());
         bp.setRight(buildVolumeSlider());
+        bp.setTop(buildMenuBar());
         return bp;
     }
 
@@ -183,7 +183,13 @@ public class MusicPlayerGUI extends Application implements Observer {
         return slider;
     }
 
-    //private MenuBar
+    private MenuBar buildMenuBar() {
+        MenuBar menuBar = new MenuBar();
+        Menu menuFile = new Menu("File");
+        menuBar.getMenus().addAll(menuFile);
+        return menuBar;
+    }
+
 
     /**
      *
