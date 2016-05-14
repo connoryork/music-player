@@ -9,46 +9,56 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.File;
 import java.util.Observer;
 
 /**
- * TODO COMMENT
+ * TODO
  *
  * @author connoryork (cxy1054@rit.edu)
  */
 public class MusicPlayerGUI extends Application implements Observer {
 
+    /** CONSTANTS FOR GUI DESIGN AND LAYOUT */
     private static final int DEFAULT_PADDING = 5;
     private static final int DEFAULT_SPACING = 10;
     private static final int DEFAULT_SLIDER_HEIGHT = 80;
     private static final int DEFAULT_WINDOW_HEIGHT = 0;
     private static final int DEFAULT_WINDOW_WIDTH = 0;
 
+    /** CONSTANTS TO A SONG FOR EASY UPDATING OF SLIDER */
     private static int MIN_VOLUME;
     private static int MAX_VOLUME;
 
+    /** Model for easy access */
     private MusicPlayerModel model;
+
+    /** Play/Pause button for easy access */
+    private Button play;
+    /** Volume Slider for easy access */
+    private Slider volumeSlider;
 
     /**
      * Launches the GUI.
      *
      * @param args not used
      */
-
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Initializes the model and sets the GUI as an observer.
+     */
     @Override
     public void init() {
-        Parameters params = getParameters();
-        this.model = new MusicPlayerModel("resources/" + params.getRaw().get(0));
-        MIN_VOLUME = (int) this.model.getMinVolume();
-        MAX_VOLUME = (int) this.model.getMaxVolume();
+        this.model = new MusicPlayerModel();
+        this.model.addObserver(this);
     }
 
     /**
@@ -59,7 +69,7 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Scene s = new Scene(buildRoot());
+        Scene s = new Scene(buildRoot(primaryStage));
         primaryStage.initStyle(StageStyle.UTILITY);
         primaryStage.setScene(s);
         primaryStage.setResizable(false);
@@ -84,12 +94,12 @@ public class MusicPlayerGUI extends Application implements Observer {
      *
      * @return BorderPane Node
      */
-    private BorderPane buildRoot() {
+    private BorderPane buildRoot(Stage stage) {
         BorderPane bp = new BorderPane();
         bp.setPrefSize(350, 80);
         bp.setCenter(buildCenter());
         bp.setRight(buildVolumeSlider());
-        bp.setTop(buildMenuBar());
+        bp.setTop(buildMenuBar(stage));
         return bp;
     }
 
@@ -130,14 +140,17 @@ public class MusicPlayerGUI extends Application implements Observer {
         Button play = new Button();
         setImage(play, "play.png");
         play.setOnAction(e -> {
-            if (!this.model.isRunning()) {
-                setImage(play, "pause.png");
-                this.model.start();
-            } else {
-                setImage(play, "play.png");
-                this.model.stop();
+            if (this.model.hasClip()) {
+                if (!this.model.isRunning()) {
+                    setImage(play, "pause.png");
+                    this.model.start();
+                } else {
+                    setImage(play, "play.png");
+                    this.model.stop();
+                }
             }
         });
+        this.play = play;
         return play;
     }
 
@@ -180,25 +193,54 @@ public class MusicPlayerGUI extends Application implements Observer {
         slider.valueProperty().addListener((observable, oldValue, newValue) -> {
             this.model.volumeChange(newValue.doubleValue());
         });
+        this.volumeSlider = slider;
         return slider;
     }
 
-    private MenuBar buildMenuBar() {
+    /**
+     * Builds the menu bar, which allows picking of songs.
+     *
+     * @param stage GUI's stage
+     * @return MenuBar object to add to the stage
+     */
+    private MenuBar buildMenuBar(Stage stage) {
         MenuBar menuBar = new MenuBar();
         Menu menuFile = new Menu("File");
+        MenuItem choose = new MenuItem("Choose Song",
+                new ImageView(new Image("resources/musicnote.png")));
+        choose.setOnAction(e -> {
+            FileChooser songChooser = new FileChooser();
+            File newSong = songChooser.showOpenDialog(stage);
+            if (newSong != null) {
+                if (this.model.hasClip() && this.model.isRunning())
+                    this.model.stop();
+                this.model.changeSong("resources/" + newSong.getName());
+                MIN_VOLUME = (int) this.model.getMinVolume();
+                MAX_VOLUME = (int) this.model.getMaxVolume();
+                // update slider
+                int half = (MAX_VOLUME + MIN_VOLUME)/2;
+                this.volumeSlider.setMax(MAX_VOLUME);
+                this.volumeSlider.setMin(half);
+                this.volumeSlider.setValue((MAX_VOLUME + half)/2);
+            }
+        });
+        menuFile.getItems().add(choose);
         menuBar.getMenus().addAll(menuFile);
-        MenuItem choose = new MenuItem("Choose Song");
         return menuBar;
     }
 
-
     /**
+     * Updates GUI based on changes in the model
      *
-     * @param o
-     * @param arg
+     * @param o not used
+     * @param arg not used
      */
     @Override
     public void update(java.util.Observable o, Object arg) {
-
+        // make sure play button is in sync
+        if (this.model.isRunning())
+            setImage(this.play, "pause.png");
+        else
+            setImage(this.play, "play.png");
     }
 }

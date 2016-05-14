@@ -1,8 +1,9 @@
 import javax.sound.sampled.*;
 import java.util.Observable;
 /**
+ * TODO
  *
- *
+ * @author connoryork (cxy1054@rit.edu)
  * @author mbroman (broman334@tamu.edu)
  */
 public class MusicPlayerModel extends Observable {
@@ -22,6 +23,9 @@ public class MusicPlayerModel extends Observable {
     *                                                       *
     ********************************************************/
 
+    /**
+     * TODO
+     */
     public MusicPlayerModel() {
         this.clip = null;
         this.audioStream = null;
@@ -67,9 +71,9 @@ public class MusicPlayerModel extends Observable {
     ********************************************************/
 
     /**
-     * changes the song loaded onto the clip
+     * Changes the song loaded onto the clip.
      *
-     * @param song
+     * @param song TODO
      */
     public void changeSong(String song) {
         try {
@@ -94,11 +98,11 @@ public class MusicPlayerModel extends Observable {
         } catch (Exception e) {
             System.out.println("Failed to load audio.");
         }
-
+        announceChanges();
     }
 
     /**
-     * starts the song from its current position
+     * Starts the song from its current position.
      */
     public void start() {
         if (clip != null && !clip.isRunning()) {
@@ -107,7 +111,7 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     * pauses the clip;
+     * Pauses the clip.
      */
     public void stop() {
         if (this.clip.isRunning() && this.clip != null) {
@@ -116,7 +120,7 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     * changes the clips loudness
+     * Changes the clips loudness.
      *
      * @param decibels decibels desired by the user
      */
@@ -127,11 +131,10 @@ public class MusicPlayerModel extends Observable {
         }
         else
             gainControl.setValue((float)decibels);
-        System.out.println(gainControl.getValue());
     }
 
     /**
-     * rewinds the clip to the start
+     * Rewinds the clip to the start.
      */
     public void rewindToStart() {
         if(this.clip != null) {
@@ -145,7 +148,7 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     *
+     * TODO
      */
     public void setSongPosition(int changed) {
         if(this.clip != null) {
@@ -155,23 +158,47 @@ public class MusicPlayerModel extends Observable {
         }
     }
 
-
+    /**
+     * TODO
+     * @return
+     */
     public double getMinVolume() {
         FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
         return gainControl.getMinimum();
     }
 
+    /**
+     * TODO
+     * @return
+     */
     public double getMaxVolume() {
         FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
         return gainControl.getMaximum();
     }
 
     /**
-     * returns the state of the music player.
+     * Returns the state of the music player.
      *
-     * @return clip.isRunning()
+     * @return true if song is playing, false otherwise
      */
     public boolean isRunning() {
         return this.clip.isRunning();
+    }
+
+    /**
+     * Returns if the music player has a current song (clip).
+     *
+     * @return true if song exists, false otherwise
+     */
+    public boolean hasClip() {
+        return this.clip != null;
+    }
+
+    /**
+     * Utility function to notify GUI that changes were made with the model's instance variables.
+     */
+    private void announceChanges() {
+        setChanged();
+        notifyObservers();
     }
 }
