@@ -121,8 +121,7 @@ public class MusicPlayerModel extends Observable {
      * @param decibels decibels desired by the user
      */
     public void volumeChange(double decibels) {
-        FloatControl gainControl =
-                (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+        FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
         if (decibels == ((int)getMaxVolume() + (int)getMinVolume())/2) {
             gainControl.setValue((float)this.getMinVolume());
         }
