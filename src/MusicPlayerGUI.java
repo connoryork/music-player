@@ -18,7 +18,8 @@ import java.io.File;
 import java.util.Observer;
 
 /**
- * TODO
+ * View/Controller in the Model-View-Controller design pattern for MusicPlayer.
+ * Deals with GUI construction, event handling, and updating the GUI.
  *
  * @author connoryork (cxy1054@rit.edu)
  */
@@ -28,8 +29,6 @@ public class MusicPlayerGUI extends Application implements Observer {
     private static final int DEFAULT_PADDING = 5;
     private static final int DEFAULT_SPACING = 10;
     private static final int DEFAULT_SLIDER_HEIGHT = 80;
-    private static final int DEFAULT_WINDOW_HEIGHT = 0;
-    private static final int DEFAULT_WINDOW_WIDTH = 0;
 
     /** CONSTANTS TO A SONG FOR EASY UPDATING OF SLIDER */
     private static int MIN_VOLUME;
@@ -42,6 +41,8 @@ public class MusicPlayerGUI extends Application implements Observer {
     private Button play;
     /** Volume Slider for easy access */
     private Slider volumeSlider;
+    /** Song Slider for easy access */
+    private Slider songSlider;
 
     /**
      * Launches the GUI.
@@ -96,10 +97,11 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     private BorderPane buildRoot(Stage stage) {
         BorderPane bp = new BorderPane();
-        bp.setPrefSize(350, 80);
+        bp.setPrefSize(300, 80);
         bp.setCenter(buildCenter());
         bp.setRight(buildVolumeSlider());
         bp.setTop(buildMenuBar(stage));
+        bp.setBottom(buildSongSlider());
         return bp;
     }
 
@@ -142,12 +144,19 @@ public class MusicPlayerGUI extends Application implements Observer {
         play.setOnAction(e -> {
             if (this.model.hasClip()) {
                 if (!this.model.isRunning()) {
+                    if (this.model.atEnd()) {
+                        this.model.setSongPosition(0);
+                        setImage(play, "pause.png");
+                        this.model.start();
+                    }
                     setImage(play, "pause.png");
                     this.model.start();
                 } else {
                     setImage(play, "play.png");
                     this.model.stop();
                 }
+            } else {
+                setImage(play, "play.png");
             }
         });
         this.play = play;
@@ -185,8 +194,7 @@ public class MusicPlayerGUI extends Application implements Observer {
      * @return Slider which controls volume
      */
     private Slider buildVolumeSlider() {
-        int half = (MAX_VOLUME + MIN_VOLUME)/2;
-        Slider slider = new Slider(half, MAX_VOLUME, (MAX_VOLUME + half)/2);
+        Slider slider = new Slider(0, 0, 0);
         slider.setOrientation(Orientation.VERTICAL);
         slider.setPadding(new Insets(DEFAULT_PADDING));
         slider.setMaxHeight(DEFAULT_SLIDER_HEIGHT);
@@ -217,16 +225,29 @@ public class MusicPlayerGUI extends Application implements Observer {
                 this.model.changeSong("resources/" + newSong.getName());
                 MIN_VOLUME = (int) this.model.getMinVolume();
                 MAX_VOLUME = (int) this.model.getMaxVolume();
-                // update slider
+                // update volume slider
                 int half = (MAX_VOLUME + MIN_VOLUME)/2;
                 this.volumeSlider.setMax(MAX_VOLUME);
                 this.volumeSlider.setMin(half);
                 this.volumeSlider.setValue((MAX_VOLUME + half)/2);
+                // update song slider
+                this.songSlider.setMax(this.model.getClipLength());
+                this.songSlider.setMin(0);
+                this.songSlider.setValue(0);
             }
         });
         menuFile.getItems().add(choose);
         menuBar.getMenus().addAll(menuFile);
         return menuBar;
+    }
+
+    private Slider buildSongSlider() {
+        Slider songSlider = new Slider(0,0,0);
+        this.songSlider = songSlider;
+        songSlider.valueProperty().addListener(((observable, oldValue, newValue) -> {
+            this.model.setSongPosition(newValue.intValue());
+        }));
+        return songSlider;
     }
 
     /**

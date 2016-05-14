@@ -149,17 +149,22 @@ public class MusicPlayerModel extends Observable {
 
     /**
      * TODO
+     *
+     * @param position frame position to set song at (0 < position < this.clip.getFrameLength())
      */
-    public void setSongPosition(int changed) {
+    public void setSongPosition(int position) {
         if(this.clip != null) {
             this.clip.stop();
-            this.clip.setFramePosition(this.clip.getFramePosition() - changed);
+            System.out.println(this.clip.getFramePosition());
+            this.clip.setFramePosition(position);
+            System.out.println(this.clip.getFramePosition());
             this.clip.start();
         }
     }
 
     /**
      * TODO
+     *
      * @return
      */
     public double getMinVolume() {
@@ -169,11 +174,25 @@ public class MusicPlayerModel extends Observable {
 
     /**
      * TODO
+     *
      * @return
      */
     public double getMaxVolume() {
         FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
         return gainControl.getMaximum();
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    public int getClipLength() {
+        return this.clip.getFrameLength();
+    }
+
+    public boolean atEnd() {
+        return this.clip.getFramePosition() == this.clip.getFrameLength();
     }
 
     /**
