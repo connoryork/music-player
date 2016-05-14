@@ -68,9 +68,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         primaryStage.show();
 
         Rectangle2D screen = Screen.getPrimary().getVisualBounds();
-        //primaryStage.setX((screen.getWidth() - primaryStage.getWidth()) / 2);
-        //primaryStage.setY((screen.getHeight() - primaryStage.getHeight()) / 4);
-        primaryStage.setX(screen.getWidth() - primaryStage.getWidth());
+        primaryStage.setX(screen.getWidth()/2);
         System.out.println(screen.getHeight());
         System.out.println(primaryStage.getHeight());
         primaryStage.setY(screen.getHeight() - primaryStage.getHeight());
@@ -137,7 +135,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         play.setOnAction(e -> {
             if (play.isSelected()) {
                 setImage(play, "pause.png");
-                model.play();
+                model.start();
             } else {
                 setImage(play, "play.png");
                 model.stop();
@@ -181,6 +179,9 @@ public class MusicPlayerGUI extends Application implements Observer {
         slider.setOrientation(Orientation.VERTICAL);
         slider.setPadding(new Insets(DEFAULT_PADDING));
         slider.setMaxHeight(DEFAULT_SLIDER_HEIGHT);
+        slider.valueProperty().addListener(cl -> {
+            // TODO
+        });
         return slider;
     }
 

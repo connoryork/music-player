@@ -20,11 +20,12 @@ public class MusicPlayerModel extends Observable {
     private AudioFormat baseFormat;
     private AudioFormat decodeFormat;
 
-    /*******************************************************
-     *                                                      *
-     *     CONSTRUCTORS                                     *
-     *                                                      *
-     *******************************************************/
+    /********************************************************
+    *                                                       *
+    *      CONSTRUCTORS                                     *
+    *                                                       *
+    ********************************************************/
+
     public MusicPlayerModel() {
         this.clip = null;
         this.audioStream = null;
@@ -63,11 +64,12 @@ public class MusicPlayerModel extends Observable {
         }
     }
 
-    /*******************************************************
-     *                                                      *
-     *  HELPER METHODS FOR CONSTRUCTING MUSIC PLAYER        *
-     *                                                      *
-     *******************************************************/
+    /********************************************************
+    *                                                       *
+    *    HELPER METHODS FOR CONSTRUCTING MUSIC PLAYER       *
+    *                                                       *
+    ********************************************************/
+
     /**
      * changes the song loaded onto the clip
      *
