@@ -37,7 +37,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     private MusicPlayerModel model;
 
     /**
-     * Launches the GUI
+     * Launches the GUI.
      *
      * @param args not used
      */
@@ -49,7 +49,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     @Override
     public void init() {
         Parameters params = getParameters();
-        this.model = new MusicPlayerModel(params.getRaw().get(0));
+        this.model = new MusicPlayerModel("resources/" + params.getRaw().get(0));
     }
 
     /**
@@ -83,7 +83,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     *******************************************************/
 
     /**
-     * Builds the root node for the GUI
+     * Builds the root node for the GUI.
      *
      * @return BorderPane Node
      */
@@ -97,7 +97,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     }
 
     /**
-     * Builds HBox and corresponding buttons
+     * Builds HBox and corresponding buttons.
      *
      * @return center buttons in a HBox
      */
@@ -160,11 +160,22 @@ public class MusicPlayerGUI extends Application implements Observer {
         return next;
     }
 
+    /**
+     * Sets the image of the Button.
+     *
+     * @param b Button object
+     * @param filename filename of image
+     */
     private void setImage(ButtonBase b, String filename) {
         Image image = new Image(getClass().getResourceAsStream("resources/" + filename));
         b.setGraphic(new ImageView(image));
     }
 
+    /**
+     * Builds a slider that controls the volume of the GUI.
+     *
+     * @return Slider which controls volume
+     */
     private Slider buildVolumeSlider() {
         Slider slider = new Slider(MIN_VOLUME, MAX_VOLUME, 50); // replace starting value with current volume
         slider.setOrientation(Orientation.VERTICAL);
