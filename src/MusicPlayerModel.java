@@ -154,18 +154,21 @@ public class MusicPlayerModel extends Observable {
      */
     public void setSongPosition(int position) {
         if(this.clip != null) {
+            boolean prevRun = this.clip.isRunning();
             this.clip.stop();
             System.out.println(this.clip.getFramePosition());
             this.clip.setFramePosition(position);
             System.out.println(this.clip.getFramePosition());
-            this.clip.start();
+            if (prevRun) {
+                this.clip.start();
+            }
         }
     }
 
     /**
-     * TODO
+     * Gets the minimum decibel volume of the clip.
      *
-     * @return
+     * @return min decibel volume of the current clip
      */
     public double getMinVolume() {
         FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
@@ -173,9 +176,9 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     * TODO
+     * Gets the maximum decibel volume of the clip.
      *
-     * @return
+     * @return max decibel volume of the current clip
      */
     public double getMaxVolume() {
         FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
@@ -183,14 +186,28 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     * TODO
+     * Gets the total length of the current clip.
      *
-     * @return
+     * @return length of the current clip
      */
     public int getClipLength() {
         return this.clip.getFrameLength();
     }
 
+    /**
+     * Gets the current position of the song.
+     *
+     * @return the current integer position of the song
+     */
+    public int getClipCurrentValue() {
+        return this.clip.getFramePosition();
+    }
+
+    /**
+     * Checks if the song is at the end.
+     *
+     * @return true if at the end, false otherwise
+     */
     public boolean atEnd() {
         return this.clip.getFramePosition() == this.clip.getFrameLength();
     }
@@ -219,5 +236,40 @@ public class MusicPlayerModel extends Observable {
     private void announceChanges() {
         setChanged();
         notifyObservers();
+    }
+
+    /**
+     * Periodically notifies the GUI to update based on changes in the model.
+     */
+    private class Updater extends Thread {
+
+        /** Model for easy access */
+        private MusicPlayerModel model;
+
+        /**
+         * Contructor for Updater, which starts the thread.
+         *
+         * @param model MusicPlayerModel which thread is constantly updating
+         */
+        public Updater(MusicPlayerModel model) {
+            this.model = model;
+            this.start();
+        }
+
+        /**
+         * Waits a millisecond, and then notifies the GUI to update.
+         * This happens until the song is at the end.
+         */
+        @Override
+        public void run() {
+            while (this.model.clip.getFramePosition() != this.model.clip.getFrameLength()) {
+                try {
+                    wait(1);
+                } catch (InterruptedException ie) {
+                    System.out.println(ie.getMessage());
+                }
+                this.model.announceChanges();
+            }
+        }
     }
 }
