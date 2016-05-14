@@ -125,4 +125,27 @@ public class MusicPlayerModel extends Observable {
         gainControl.setValue((float)decibels);
     }
 
+    /**
+     * rewinds the clip to the start
+     */
+    public void rewindToStart() {
+        if(this.clip.isRunning() && this.clip != null) {
+            this.clip.stop();
+            this.clip.setFramePosition(0);
+            this.clip.start();
+        }
+    }
+
+    /**
+     *
+     */
+    public void setSongPosition(int changed) {
+        if(this.clip.isRunning() && this.clip != null) {
+            this.clip.stop();
+            this.clip.setFramePosition(this.clip.getFramePosition() - changed);
+            this.clip.start();
+        }
+    }
+
+
 }

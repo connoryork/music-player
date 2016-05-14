@@ -49,7 +49,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     @Override
     public void init() {
         Parameters params = getParameters();
-        this.model = new MusicPlayerModel(params.getRaw().get(0));
+        this.model = new MusicPlayerModel();
     }
 
     /**
@@ -137,7 +137,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         play.setOnAction(e -> {
             if (play.isSelected()) {
                 setImage(play, "pause.png");
-                model.play();
+                model.start();
             } else {
                 setImage(play, "play.png");
                 model.stop();
