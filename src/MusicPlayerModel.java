@@ -135,9 +135,12 @@ public class MusicPlayerModel extends Observable {
      */
     public void rewindToStart() {
         if(this.clip != null) {
+            boolean prevRun = this.clip.isRunning();
             this.clip.stop();
             this.clip.setFramePosition(0);
-            this.clip.start();
+            if(prevRun) {
+                this.clip.start();
+            }
         }
     }
 
