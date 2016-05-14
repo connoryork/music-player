@@ -75,7 +75,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     public void start(Stage primaryStage) throws Exception {
         Scene s = new Scene(buildRoot(primaryStage));
         primaryStage.initStyle(StageStyle.UTILITY);
-        primaryStage.getIcons().add(new Image("resources/musicnotelarge.png"));
+        primaryStage.getIcons().add(new Image("resources/musicnote.png"));
         primaryStage.setTitle("No Song Selected ~ MusicPlayer");
         primaryStage.setScene(s);
         primaryStage.setResizable(false);
