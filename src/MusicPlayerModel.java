@@ -10,15 +10,39 @@ import javax.sound.sampled.Clip;
  */
 public class MusicPlayerModel {
 
-   private Clip clip;
+    /**
+     * PRIVATE DATA MEMBERS
+     */
+    private Clip clip;
+    private AudioInputStream audioStream;
+    private AudioInputStream decodedStream;
+    private AudioFormat baseFormat;
+    private AudioFormat decodeFormat;
 
-    //Audio Magic, We get a stream from a file name and decode it. the we turn it into a clip.
+    /*******************************************************
+     *                                                      *
+     *     CONSTRUCTORS                                     *
+     *                                                      *
+     *******************************************************/
+    public MusicPlayerModel() {
+        this.clip = null;
+        this.audioStream = null;
+        this.decodedStream = null;
+        this.baseFormat = null;
+        this.decodeFormat = null;
+    }
+
+    /**
+     * Constuctor that loads a song
+     *
+     * @param song name of the song as a string intended to be played
+     */
     public MusicPlayerModel(String song) {
         try {
 
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
-            AudioFormat baseFormat = audioStream.getFormat();
-            AudioFormat decodeFormat = new AudioFormat(
+            this.audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
+            this.baseFormat = audioStream.getFormat();
+            this.decodeFormat = new AudioFormat(
                     AudioFormat.Encoding.PCM_SIGNED,
                     baseFormat.getSampleRate(),
                     16,
@@ -28,35 +52,68 @@ public class MusicPlayerModel {
                     false
             );
 
-            AudioInputStream decodedStream = AudioSystem.getAudioInputStream(decodeFormat, audioStream);
-            clip = AudioSystem.getClip();
-            clip.open(decodedStream);
-
+            this.decodedStream = AudioSystem.getAudioInputStream(decodeFormat, audioStream);
+            this.clip = AudioSystem.getClip();
+            this.clip.open(decodedStream);
+            this.clip.setFramePosition(0);
 
         } catch (Exception e) {
             System.out.println("Failed to load audio.");
         }
     }
-     //play starts the music player
-    public void play() {
-        if (clip == null) { return; }
-        stop();
-        clip.setFramePosition(0);
-        clip.start();
+
+    /*******************************************************
+     *                                                      *
+     *  HELPER METHODS FOR CONSTRUCTING MUSIC PLAYER        *
+     *                                                      *
+     *******************************************************/
+    /**
+     * changes the song loaded onto the clip
+     *
+     * @param song
+     */
+    public void ChangeSong(String song) {
+        try {
+
+            this.audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
+            this.baseFormat = audioStream.getFormat();
+            this.decodeFormat = new AudioFormat(
+                    AudioFormat.Encoding.PCM_SIGNED,
+                    baseFormat.getSampleRate(),
+                    16,
+                    baseFormat.getChannels(),
+                    baseFormat.getChannels() * 2,
+                    baseFormat.getSampleRate(),
+                    false
+            );
+
+            this.decodedStream = AudioSystem.getAudioInputStream(decodeFormat, audioStream);
+            this.clip = AudioSystem.getClip();
+            this.clip.open(decodedStream);
+            this.clip.setFramePosition(0);
+
+        } catch (Exception e) {
+            System.out.println("Failed to load audio.");
+        }
+
     }
 
+    /**
+     * starts the song from its current position
+     */
     public void start() {
         if (clip != null && !clip.isRunning()) {
             clip.start();
         }
     }
 
-    //stop stops the music player, retains
-    public void stop() { if (clip.isRunning()) clip.stop(); }
-
-    //a pesudo delete
-    public void close() {
-        stop();
-        clip.close();
+    /**
+     * pauses the clip;
+     */
+    public void stop() {
+        if (this.clip.isRunning() && this.clip != null) {
+            this.clip.stop();
+        }
     }
+
 }
