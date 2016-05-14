@@ -2,13 +2,14 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import java.util.Observable;
 
 /**
  *
  *
  * @author mbroman (broman334@tamu.edu)
  */
-public class MusicPlayerModel {
+public class MusicPlayerModel extends Observable {
 
     /**
      * PRIVATE DATA MEMBERS
