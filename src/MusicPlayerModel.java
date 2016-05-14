@@ -96,21 +96,6 @@ public class MusicPlayerModel extends Observable {
             this.clip = AudioSystem.getClip();
             this.clip.open(decodedStream);
             this.clip.setFramePosition(0);
-            Task<MusicPlayerModel> updater = new Task<MusicPlayerModel>(this) {
-                @Override
-                protected MusicPlayerModel call() throws Exception {
-                    while (this.clip.getFramePosition() != this.model.clip.getFrameLength()) {
-                        try {
-                            this.wait(1);
-                        } catch (InterruptedException ie) {
-                            System.out.println(ie.getMessage());
-                        }
-                        this.model.announceChanges();
-                    }
-                    return null;
-                }
-            };
-            new Thread(updater).start();
         } catch (Exception e) {
             System.out.println("Failed to load audio.");
         }
@@ -256,17 +241,17 @@ public class MusicPlayerModel extends Observable {
 
     /**
      * Periodically notifies the GUI to update based on changes in the model.
-     */
+     *
     private class Updater extends Task {
 
-        /** Model for easy access */
+        /** Model for easy access *
         private MusicPlayerModel model;
 
         /**
          * Contructor for Updater, which starts the thread.
          *
          * @param model MusicPlayerModel which thread is constantly updating
-         */
+         *
         public Updater(MusicPlayerModel model) {
             this.model = model;
         }
@@ -274,7 +259,7 @@ public class MusicPlayerModel extends Observable {
         /**
          * Waits a millisecond, and then notifies the GUI to update.
          * This happens until the song is at the end.
-         */
+         *
         @Override
         public void run() {
             synchronized (this) {
@@ -294,4 +279,5 @@ public class MusicPlayerModel extends Observable {
             return null;
         }
     }
+        */
 }

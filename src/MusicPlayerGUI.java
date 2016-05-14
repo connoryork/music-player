@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -16,6 +17,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Popup;
 import javafx.geometry.Point2D;
+import javafx.concurrent.Service;
 
 import java.io.File;
 import java.util.Observer;
@@ -46,6 +48,8 @@ public class MusicPlayerGUI extends Application implements Observer {
     private Slider volumeSlider;
     /** Song Slider for easy access */
     private Slider songSlider;
+    /**Thread for updating the songs positions on the slider */
+    private Service<Void> backgroundThread;
 
     /**
      * Launches the GUI.
@@ -155,9 +159,32 @@ public class MusicPlayerGUI extends Application implements Observer {
                         setImage(play, "pause.png");
                         this.model.start();
                     }
+
+                    /**
+                     * start id the background thread will update the sliders value until it hits the end of the song
+                     */
+                    this.backgroundThread = new Service<Void>() {
+                        @Override
+                        protected Task<Void> createTask() {
+                            return new Task<Void>() {
+                                @Override
+                                protected Void call() throws Exception {
+                                    while (!model.atEnd()) {
+                                        updateProgress(model.getClipCurrentValue(), model.getClipLength());
+                                    }
+                                    return null;
+                                }
+                            };
+                        }
+                    };
+                    songSlider.valueProperty().bind(backgroundThread.progressProperty());
+                    backgroundThread.restart();
+                    /** end of the thread code */
+
                     setImage(play, "pause.png");
                     this.model.start();
                 } else {
+                    backgroundThread.cancel();
                     setImage(play, "play.png");
                     this.model.stop();
                 }
@@ -278,10 +305,18 @@ public class MusicPlayerGUI extends Application implements Observer {
         this.songSlider = songSlider;
         songSlider.setPadding(new Insets(DEFAULT_PADDING));
         songSlider.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            this.model.setSongPosition(newValue.intValue());
+            if(!backgroundThread.isRunning()) {
+                this.model.setSongPosition(newValue.intValue());
+            }
+            else {
+                backgroundThread.cancel();
+                this.model.setSongPosition(newValue.intValue());
+            }
         }));
         return songSlider;
     }
+
+
 
     /**
      * Updates GUI based on changes in the model
