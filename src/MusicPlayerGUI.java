@@ -176,7 +176,7 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     private Slider buildVolumeSlider() {
         int half = (MAX_VOLUME + MIN_VOLUME)/2;
-        Slider slider = new Slider(half, MAX_VOLUME, (MAX_VOLUME + half)/2); // replace starting value with current volume
+        Slider slider = new Slider(half, MAX_VOLUME, (MAX_VOLUME + half)/2);
         slider.setOrientation(Orientation.VERTICAL);
         slider.setPadding(new Insets(DEFAULT_PADDING));
         slider.setMaxHeight(DEFAULT_SLIDER_HEIGHT);
