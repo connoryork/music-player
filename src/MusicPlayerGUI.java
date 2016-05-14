@@ -187,6 +187,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         MenuBar menuBar = new MenuBar();
         Menu menuFile = new Menu("File");
         menuBar.getMenus().addAll(menuFile);
+        MenuItem choose = new MenuItem("Choose Song");
         return menuBar;
     }
 
