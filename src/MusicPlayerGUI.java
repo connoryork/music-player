@@ -4,6 +4,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,6 +14,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Popup;
+import javafx.geometry.Point2D;
 
 import java.io.File;
 import java.util.Observer;
@@ -143,7 +146,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         setImage(play, "play.png");
         play.setOnAction(e -> {
             if (this.model.hasClip()) {
-                if (!this.model.isRunning()) {
+                if (!this.model.isRunning()) { //paused
                     if (this.model.atEnd()) {
                         this.model.setSongPosition(0);
                         setImage(play, "pause.png");
@@ -242,7 +245,32 @@ public class MusicPlayerGUI extends Application implements Observer {
     }
 
     private Slider buildSongSlider() {
-        Slider songSlider = new Slider(0,0,0);
+        Slider songSlider = new Slider(0, 0, 0);
+        songSlider.setShowTickMarks(true);
+        songSlider.setShowTickLabels(false);
+        songSlider.setMajorTickUnit(60 * 44231.5636364);
+
+        Label label = new Label();
+        Popup popup = new Popup();
+        popup.getContent().add(label);
+
+        songSlider.setOnMouseMoved(e -> {
+            NumberAxis axis = (NumberAxis) songSlider.lookup(".axis");
+            Point2D location = axis.sceneToLocal(e.getSceneX(), e.getSceneY());
+            double mouseX = location.getX();
+            double value = axis.getValueForDisplay(mouseX).doubleValue();
+            if (value >= songSlider.getMin() && value <= songSlider.getMax()) {
+                label.setText(String.format("%d:%d",(int)(value/44231.5636364)/60,(int)(value/44231.5636364)%60));
+            } else {
+                label.setText("");
+            }
+            popup.setAnchorX(e.getScreenX() - 5);
+            popup.setAnchorY(e.getScreenY() - 20);
+        });
+
+        songSlider.setOnMouseEntered(e -> popup.show(songSlider, e.getScreenX() - 5, e.getScreenY() - 20));
+        songSlider.setOnMouseExited(e -> popup.hide());
+
         this.songSlider = songSlider;
         songSlider.valueProperty().addListener(((observable, oldValue, newValue) -> {
             this.model.setSongPosition(newValue.intValue());

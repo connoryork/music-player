@@ -201,7 +201,7 @@ public class MusicPlayerModel extends Observable {
      * @return true if song is playing, false otherwise
      */
     public boolean isRunning() {
-        return this.clip.isRunning();
+        return (this.clip.isRunning() || this.atEnd());
     }
 
     /**
