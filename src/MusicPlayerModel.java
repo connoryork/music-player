@@ -1,6 +1,5 @@
 import javax.sound.sampled.*;
 import java.util.Observable;
-
 /**
  *
  *
@@ -124,7 +123,7 @@ public class MusicPlayerModel extends Observable {
     public void volumeChange(double decibels) {
         FloatControl gainControl =
                 (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
-        if (this.getMaxVolume() / 2 == decibels) {
+        if (decibels == ((int)getMaxVolume() + (int)getMinVolume())/2) {
             gainControl.setValue((float)this.getMinVolume());
         }
         else
