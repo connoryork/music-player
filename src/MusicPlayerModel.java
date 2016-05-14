@@ -1,7 +1,4 @@
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
 import java.util.Observable;
 
 /**
@@ -75,7 +72,7 @@ public class MusicPlayerModel extends Observable {
      *
      * @param song
      */
-    public void ChangeSong(String song) {
+    public void changeSong(String song) {
         try {
 
             this.audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
@@ -117,6 +114,17 @@ public class MusicPlayerModel extends Observable {
         if (this.clip.isRunning() && this.clip != null) {
             this.clip.stop();
         }
+    }
+
+    /**
+     * changes the clips loudness
+     *
+     * @param decibels decibels desired by the user
+     */
+    public void volumeChange(double decibels) {
+        FloatControl gainControl =
+                (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+        gainControl.setValue((float)decibels);
     }
 
 }
