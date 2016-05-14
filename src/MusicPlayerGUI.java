@@ -31,8 +31,8 @@ public class MusicPlayerGUI extends Application implements Observer {
     private static final int DEFAULT_WINDOW_HEIGHT = 0;
     private static final int DEFAULT_WINDOW_WIDTH = 0;
 
-    private static final int MIN_VOLUME = 0;
-    private static final int MAX_VOLUME = 100;
+    private static int MIN_VOLUME;
+    private static int MAX_VOLUME;
 
     private MusicPlayerModel model;
 
@@ -50,6 +50,8 @@ public class MusicPlayerGUI extends Application implements Observer {
     public void init() {
         Parameters params = getParameters();
         this.model = new MusicPlayerModel("resources/" + params.getRaw().get(0));
+        this.MIN_VOLUME = (int) this.model.getMinVolume();
+        this.MAX_VOLUME = (int) this.model.getMaxVolume();
     }
 
     /**
@@ -179,8 +181,8 @@ public class MusicPlayerGUI extends Application implements Observer {
         slider.setOrientation(Orientation.VERTICAL);
         slider.setPadding(new Insets(DEFAULT_PADDING));
         slider.setMaxHeight(DEFAULT_SLIDER_HEIGHT);
-        slider.valueProperty().addListener(cl -> {
-            // TODO
+        slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            this.model.volumeChange(newValue.doubleValue());
         });
         return slider;
     }

@@ -125,6 +125,16 @@ public class MusicPlayerModel extends Observable {
         FloatControl gainControl =
                 (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
         gainControl.setValue((float)decibels);
+        System.out.println(gainControl.getValue());
     }
 
+    public double getMinVolume() {
+        FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+        return gainControl.getMinimum();
+    }
+
+    public double getMaxVolume() {
+        FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+        return gainControl.getMaximum();
+    }
 }
