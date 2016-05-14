@@ -162,4 +162,13 @@ public class MusicPlayerModel extends Observable {
         FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
         return gainControl.getMaximum();
     }
+
+    /**
+     * returns the state of the music player.
+     *
+     * @return clip.isRunning()
+     */
+    public boolean isRunning() {
+        return this.clip.isRunning();
+    }
 }
