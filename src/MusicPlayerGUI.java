@@ -4,10 +4,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBase;
-import javafx.scene.control.Slider;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -127,18 +124,18 @@ public class MusicPlayerGUI extends Application implements Observer {
     /**
      * Builds play button, which pauses and plays the song.
      *
-     * @return play ToggleButton
+     * @return play Button
      */
-    private ToggleButton buildPlayPause() {
-        ToggleButton play = new ToggleButton();
+    private Button buildPlayPause() {
+        Button play = new Button();
         setImage(play, "play.png");
         play.setOnAction(e -> {
-            if (play.isSelected()) {
+            if (!this.model.isRunning()) {
                 setImage(play, "pause.png");
-                model.start();
+                this.model.start();
             } else {
                 setImage(play, "play.png");
-                model.stop();
+                this.model.stop();
             }
         });
         return play;
@@ -185,6 +182,8 @@ public class MusicPlayerGUI extends Application implements Observer {
         });
         return slider;
     }
+
+    //private MenuBar
 
     /**
      *
