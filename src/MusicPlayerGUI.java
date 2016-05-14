@@ -49,7 +49,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     @Override
     public void init() {
         Parameters params = getParameters();
-        this.model = new MusicPlayerModel();
+        this.model = new MusicPlayerModel(params.getRaw().get(0));
     }
 
     /**
