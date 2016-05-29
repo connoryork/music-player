@@ -1,5 +1,6 @@
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -17,9 +18,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Popup;
 import javafx.geometry.Point2D;
-import javafx.concurrent.Service;
+import javafx.util.Duration;
 
 import java.io.File;
+import java.util.List;
 import java.util.Observer;
 
 /**
@@ -48,8 +50,6 @@ public class MusicPlayerGUI extends Application implements Observer {
     private Slider volumeSlider;
     /** Song Slider for easy access */
     private Slider songSlider;
-    /**Thread for updating the songs positions on the slider */
-    private Service<Void> backgroundThread;
 
     /**
      * Launches the GUI.
@@ -79,7 +79,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     public void start(Stage primaryStage) throws Exception {
         Scene s = new Scene(buildRoot(primaryStage));
         primaryStage.initStyle(StageStyle.UTILITY);
-        primaryStage.getIcons().add(new Image("resources/musicnote.png"));
+        primaryStage.getIcons().add(new Image("resources/musicnotelarge.png"));
         primaryStage.setTitle("No Song Selected ~ MusicPlayer");
         primaryStage.setScene(s);
         primaryStage.setResizable(false);
@@ -87,7 +87,7 @@ public class MusicPlayerGUI extends Application implements Observer {
         primaryStage.show();
 
         Rectangle2D screen = Screen.getPrimary().getVisualBounds();
-        primaryStage.setX(screen.getWidth()/2);
+        primaryStage.setX(.60 * screen.getWidth());
         System.out.println(screen.getHeight());
         System.out.println(primaryStage.getHeight());
         primaryStage.setY(screen.getHeight() - primaryStage.getHeight());
@@ -152,39 +152,23 @@ public class MusicPlayerGUI extends Application implements Observer {
         setImage(play, "play.png");
         play.setOnAction(e -> {
             if (this.model.hasClip()) {
-                if (!this.model.isRunning()) { //paused
-                    if (this.model.atEnd()) {
-                        this.model.setSongPosition(0);
-                        this.songSlider.setValue(0);
-                        setImage(play, "pause.png");
-                        this.model.start();
-                    }
-
-                    /**
-                     * start id the background thread will update the sliders value until it hits the end of the song
-                     */
-                    this.backgroundThread = new Service<Void>() {
-                        @Override
-                        protected Task<Void> createTask() {
-                            return new Task<Void>() {
-                                @Override
-                                protected Void call() throws Exception {
-                                    while (!model.atEnd()) {
-                                        updateProgress(model.getClipCurrentValue(), model.getClipLength());
-                                    }
-                                    return null;
-                                }
-                            };
-                        }
-                    };
-                    songSlider.valueProperty().bind(backgroundThread.progressProperty());
-                    backgroundThread.restart();
-                    /** end of the thread code */
-
+                if (this.model.atEnd()) { // song ended but play button was pressed
+                    this.model.setSongPosition(0);
+                    this.songSlider.setValue(0);
                     setImage(play, "pause.png");
                     this.model.start();
-                } else {
-                    backgroundThread.cancel();
+                } else if (!this.model.isRunning()) { // paused
+                    setImage(play, "pause.png");
+                    this.model.start();
+
+                    /* Starts a TimeLine that automatically updates the gui every second.
+                    This allows for the song slider to move with the song's position */
+                    KeyFrame updater = new KeyFrame(Duration.seconds(1.0), event -> notifytheGUI());
+                    Timeline t = new Timeline(updater);
+                    t.setCycleCount(Timeline.INDEFINITE);
+                    t.play();
+
+                } else { // song was playing
                     setImage(play, "play.png");
                     this.model.stop();
                 }
@@ -197,7 +181,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     }
 
     /**
-     * Builds next button, which skips the current song.
+     * Builds next button, which skips the current song and plays the next song in the playlist.
      *
      * @return next Button
      */
@@ -246,35 +230,73 @@ public class MusicPlayerGUI extends Application implements Observer {
      */
     private MenuBar buildMenuBar(Stage stage) {
         MenuBar menuBar = new MenuBar();
-        Menu menuFile = new Menu("File");
-        MenuItem choose = new MenuItem("Choose Song",
+        Menu menuChoose = new Menu("Choose...");
+        // create the song chooser
+        MenuItem songItem = new MenuItem("Song",
                 new ImageView(new Image("resources/musicnote.png")));
-        choose.setOnAction(e -> {
+        songItem.setOnAction(event -> {
             FileChooser songChooser = new FileChooser();
+            songChooser.setTitle("Choose mp3 file");
+            songChooser.setInitialDirectory(new File(System.getProperty("user.home") + "\\Music"));
+            songChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("MP3 Files", "*.mp3"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
             File newSong = songChooser.showOpenDialog(stage);
             if (newSong != null) {
-                if (this.model.hasClip() && this.model.isRunning())
-                    this.model.stop();
-                this.model.changeSong("resources/" + newSong.getName());
+                loadSong(newSong);
                 stage.setTitle(newSong.getName() + " ~ MusicPlayer");
-                MIN_VOLUME = (int) this.model.getMinVolume();
-                MAX_VOLUME = (int) this.model.getMaxVolume();
-                // update volume slider
-                int half = (MAX_VOLUME + MIN_VOLUME)/2;
-                this.volumeSlider.setMax(MAX_VOLUME);
-                this.volumeSlider.setMin(half);
-                this.volumeSlider.setValue((MAX_VOLUME + half)/2);
-                // update song slider
-                this.songSlider.setMax(this.model.getClipLength());
-                this.songSlider.setMin(0);
-                this.songSlider.setValue(0);
+                this.model.setPlaylist(null);
             }
+
         });
-        menuFile.getItems().add(choose);
-        menuBar.getMenus().addAll(menuFile);
+        // create the playlist chooser
+        MenuItem playlistItem = new MenuItem("Playlist");
+        playlistItem.setOnAction(event -> {
+            FileChooser playlistChooser = new FileChooser();
+            playlistChooser.setTitle("Choose mp3 files");
+            playlistChooser.setInitialDirectory(new File(System.getProperty("user.home") + "\\Music"));
+            playlistChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("MP3 Files", "*.mp3"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
+            List<File> newPlaylist = playlistChooser.showOpenMultipleDialog(stage);
+            if (newPlaylist != null) {
+                this.model.setPlaylist(newPlaylist);
+                loadSong(newPlaylist.get(0));
+                stage.setTitle(newPlaylist.get(0).getName() + " ~ MusicPlayer");
+            }
+
+        });
+        menuChoose.getItems().addAll(songItem, playlistItem);
+        menuBar.getMenus().addAll(menuChoose);
         return menuBar;
     }
 
+    public void loadSong(File songfile) {
+        if (this.model.hasClip() && this.model.isRunning())
+            this.model.stop();
+        this.model.changeSong("resources/" + songfile.getName()); // TODO
+        MIN_VOLUME = (int) this.model.getMinVolume();
+        MAX_VOLUME = (int) this.model.getMaxVolume();
+        // update volume slider
+        int half = (MAX_VOLUME + MIN_VOLUME)/2;
+        this.volumeSlider.setMax(MAX_VOLUME);
+        this.volumeSlider.setMin(half);
+        this.volumeSlider.setValue((MAX_VOLUME + half)/2);
+        // update song slider
+        this.songSlider.setMax(this.model.getClipLength());
+        this.songSlider.setMin(0);
+        this.songSlider.setValue(0);
+    }
+
+    /**
+     * Builds the song slider, which changes song position based on mouse movement
+     * of the slider. Also shows time positions in the song by moving the cursor over
+     * the slider.
+     *
+     * @return Slider that manages song position
+     */
     private Slider buildSongSlider() {
         Slider songSlider = new Slider(0, 0, 0);
         songSlider.setShowTickMarks(true);
@@ -284,14 +306,14 @@ public class MusicPlayerGUI extends Application implements Observer {
         Label label = new Label();
         Popup popup = new Popup();
         popup.getContent().add(label);
-
+        songSlider.setOnMouseClicked(event -> this.model.setSongPosition(((int) songSlider.getValue())));
         songSlider.setOnMouseMoved(e -> {
             NumberAxis axis = (NumberAxis) songSlider.lookup(".axis");
             Point2D location = axis.sceneToLocal(e.getSceneX(), e.getSceneY());
             double mouseX = location.getX();
             double value = axis.getValueForDisplay(mouseX).doubleValue();
             if (value >= songSlider.getMin() && value <= songSlider.getMax()) {
-                label.setText(String.format("%d:%d",(int)(value/44231.5636364)/60,(int)(value/44231.5636364)%60));
+                label.setText(String.format("%d:%02d",(int)(value/44231.5636364)/60,(int)(value/44231.5636364)%60));
             } else {
                 label.setText("");
             }
@@ -304,18 +326,17 @@ public class MusicPlayerGUI extends Application implements Observer {
 
         this.songSlider = songSlider;
         songSlider.setPadding(new Insets(DEFAULT_PADDING));
-        songSlider.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            if(!backgroundThread.isRunning()) {
-                this.model.setSongPosition(newValue.intValue());
-            }
-            else {
-                backgroundThread.cancel();
-                this.model.setSongPosition(newValue.intValue());
-            }
-        }));
         return songSlider;
     }
 
+    /**
+     * Notifies the GUI to update.
+     *
+     * Used by the TimeLine to update the song sliders position.
+     */
+    public void notifytheGUI() {
+        this.model.announceChanges();
+    }
 
 
     /**
@@ -331,11 +352,15 @@ public class MusicPlayerGUI extends Application implements Observer {
             setImage(this.play, "pause.png");
         else
             setImage(this.play, "play.png");
-        if (this.model.getClipCurrentValue() == this.model.getClipLength()) {
-            setImage(this.play, "play.png");
-            this.songSlider.setValue(0);
+        if (this.model.hasClip()) {
+            if (this.model.getClipCurrentValue() == this.model.getClipLength()) {
+                setImage(this.play, "play.png");
+                this.songSlider.setValue(0);
+            }
+
+            // update slider based on current song position
+            this.songSlider.setValue(this.model.getClipCurrentValue());
         }
-        // update slider based on current song position
-        this.songSlider.setValue(this.model.getClipCurrentValue());
+
     }
 }

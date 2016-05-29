@@ -1,7 +1,8 @@
-import javafx.concurrent.Task;
-
 import javax.sound.sampled.*;
+import java.io.File;
+import java.util.List;
 import java.util.Observable;
+
 /**
  * TODO
  *
@@ -18,6 +19,7 @@ public class MusicPlayerModel extends Observable {
     private AudioInputStream decodedStream;
     private AudioFormat baseFormat;
     private AudioFormat decodeFormat;
+    private List<File> playlist;
 
     /********************************************************
     *                                                       *
@@ -26,7 +28,7 @@ public class MusicPlayerModel extends Observable {
     ********************************************************/
 
     /**
-     * TODO
+     * Constructor for the model. Essentially sets up the model with everything set to null.
      */
     public MusicPlayerModel() {
         this.clip = null;
@@ -34,43 +36,8 @@ public class MusicPlayerModel extends Observable {
         this.decodedStream = null;
         this.baseFormat = null;
         this.decodeFormat = null;
+        this.playlist = null;
     }
-
-    /**
-     * Constuctor that loads a song
-     *
-     * @param song name of the song as a string intended to be played
-     */
-    public MusicPlayerModel(String song) {
-        try {
-
-            this.audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
-            this.baseFormat = audioStream.getFormat();
-            this.decodeFormat = new AudioFormat(
-                    AudioFormat.Encoding.PCM_SIGNED,
-                    baseFormat.getSampleRate(),
-                    16,
-                    baseFormat.getChannels(),
-                    baseFormat.getChannels() * 2,
-                    baseFormat.getSampleRate(),
-                    false
-            );
-
-            this.decodedStream = AudioSystem.getAudioInputStream(decodeFormat, audioStream);
-            this.clip = AudioSystem.getClip();
-            this.clip.open(decodedStream);
-            this.clip.setFramePosition(0);
-
-        } catch (Exception e) {
-            System.out.println("Failed to load audio.");
-        }
-    }
-
-    /********************************************************
-    *                                                       *
-    *    HELPER METHODS FOR CONSTRUCTING MUSIC PLAYER       *
-    *                                                       *
-    ********************************************************/
 
     /**
      * Changes the song loaded onto the clip.
@@ -79,7 +46,6 @@ public class MusicPlayerModel extends Observable {
      */
     public void changeSong(String song) {
         try {
-
             this.audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
             this.baseFormat = audioStream.getFormat();
             this.decodeFormat = new AudioFormat(
@@ -91,23 +57,23 @@ public class MusicPlayerModel extends Observable {
                     baseFormat.getSampleRate(),
                     false
             );
-
             this.decodedStream = AudioSystem.getAudioInputStream(decodeFormat, audioStream);
             this.clip = AudioSystem.getClip();
             this.clip.open(decodedStream);
             this.clip.setFramePosition(0);
         } catch (Exception e) {
             System.out.println("Failed to load audio.");
+        } finally {
+            announceChanges();
         }
-        announceChanges();
     }
 
     /**
      * Starts the song from its current position.
      */
     public void start() {
-        if (clip != null && !clip.isRunning()) {
-            clip.start();
+        if (this.hasClip() && !this.clip.isRunning()) {
+            this.clip.start();
         }
     }
 
@@ -115,7 +81,7 @@ public class MusicPlayerModel extends Observable {
      * Pauses the clip.
      */
     public void stop() {
-        if (this.clip.isRunning() && this.clip != null) {
+        if (this.hasClip() && this.clip.isRunning()) {
             this.clip.stop();
         }
     }
@@ -126,19 +92,20 @@ public class MusicPlayerModel extends Observable {
      * @param decibels decibels desired by the user
      */
     public void volumeChange(double decibels) {
-        FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
-        if (decibels == ((int)getMaxVolume() + (int)getMinVolume())/2) {
-            gainControl.setValue((float)this.getMinVolume());
+        if (this.hasClip()) {
+            FloatControl gainControl = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+            if (decibels == ((int) getMaxVolume() + (int) getMinVolume()) / 2) {
+                gainControl.setValue((float) this.getMinVolume());
+            } else
+                gainControl.setValue((float) decibels);
         }
-        else
-            gainControl.setValue((float)decibels);
     }
 
     /**
      * Rewinds the clip to the start.
      */
     public void rewindToStart() {
-        if(this.clip != null) {
+        if(this.hasClip()) {
             boolean prevRun = this.clip.isRunning();
             this.clip.stop();
             this.clip.setFramePosition(0);
@@ -149,17 +116,15 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     * TODO
+     * Sets the clip's position to the new value.
      *
      * @param position frame position to set song at (0 < position < this.clip.getFrameLength())
      */
     public void setSongPosition(int position) {
-        if(this.clip != null) {
+        if(this.hasClip()) {
             boolean prevRun = this.clip.isRunning();
             this.clip.stop();
-            System.out.println(this.clip.getFramePosition());
             this.clip.setFramePosition(position);
-            System.out.println(this.clip.getFramePosition());
             if (prevRun) {
                 this.clip.start();
             }
@@ -167,7 +132,17 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
+     * Sets the playlist to a new list.
+     *
+     * @param playlist list of Files to set the new playlist as
+     */
+    public void setPlaylist(List<File> playlist) {
+        this.playlist = playlist;
+    }
+
+    /**
      * Gets the minimum decibel volume of the clip.
+     * Implies that there is a current song stored in this.clip.
      *
      * @return min decibel volume of the current clip
      */
@@ -178,6 +153,7 @@ public class MusicPlayerModel extends Observable {
 
     /**
      * Gets the maximum decibel volume of the clip.
+     * Implies that there is a current song stored in this.clip.
      *
      * @return max decibel volume of the current clip
      */
@@ -188,6 +164,7 @@ public class MusicPlayerModel extends Observable {
 
     /**
      * Gets the total length of the current clip.
+     * Implies that there is a current song stored in this.clip.
      *
      * @return length of the current clip
      */
@@ -197,6 +174,7 @@ public class MusicPlayerModel extends Observable {
 
     /**
      * Gets the current position of the song.
+     * Implies that there is a current song stored in this.clip.
      *
      * @return the current integer position of the song
      */
@@ -219,7 +197,7 @@ public class MusicPlayerModel extends Observable {
      * @return true if song is playing, false otherwise
      */
     public boolean isRunning() {
-        return (this.clip.isRunning() || this.atEnd());
+        return this.hasClip() && (this.clip.isRunning() || this.atEnd());
     }
 
     /**
@@ -234,50 +212,8 @@ public class MusicPlayerModel extends Observable {
     /**
      * Utility function to notify GUI that changes were made with the model's instance variables.
      */
-    private void announceChanges() {
+    public void announceChanges() {
         setChanged();
         notifyObservers();
     }
-
-    /**
-     * Periodically notifies the GUI to update based on changes in the model.
-     *
-    private class Updater extends Task {
-
-        /** Model for easy access *
-        private MusicPlayerModel model;
-
-        /**
-         * Contructor for Updater, which starts the thread.
-         *
-         * @param model MusicPlayerModel which thread is constantly updating
-         *
-        public Updater(MusicPlayerModel model) {
-            this.model = model;
-        }
-
-        /**
-         * Waits a millisecond, and then notifies the GUI to update.
-         * This happens until the song is at the end.
-         *
-        @Override
-        public void run() {
-            synchronized (this) {
-                while (this.model.clip.getFramePosition() != this.model.clip.getFrameLength()) {
-                    try {
-                        this.wait(1);
-                    } catch (InterruptedException ie) {
-                        System.out.println(ie.getMessage());
-                    }
-                    this.model.announceChanges();
-                }
-            }
-        }
-
-        @Override
-        protected Object call() throws Exception {
-            return null;
-        }
-    }
-        */
 }
