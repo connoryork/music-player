@@ -20,6 +20,7 @@ public class MusicPlayerModel extends Observable {
     private AudioFormat baseFormat;
     private AudioFormat decodeFormat;
     private List<File> playlist;
+    private int playlistPosition;
 
     /********************************************************
     *                                                       *
@@ -44,7 +45,7 @@ public class MusicPlayerModel extends Observable {
      *
      * @param song TODO
      */
-    public void changeSong(String song) {
+    public void changeSong(String song) { //TODO make so it can load from outside resources
         try {
             this.audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
             this.baseFormat = audioStream.getFormat();
@@ -66,6 +67,39 @@ public class MusicPlayerModel extends Observable {
         } finally {
             announceChanges();
         }
+    }
+
+    /**
+     * Loads the next song in the playlist, if possible.
+     *
+     * @return TODO
+     */
+    public File loadNextSong() {
+        if (this.playlist != null) {
+            this.changeSong("resources/" + this.playlist.get(playlistPosition).getName());
+            File song = this.playlist.get(playlistPosition);
+            this.playlistPosition++;
+            if (this.playlistPosition >= this.playlist.size())
+                this.playlistPosition = 0;
+            return song;
+        }
+        return null;
+    }
+
+    /**
+     * TODO
+     *
+     * @return TODO
+     */
+    public File loadPrevSong() {
+        if (this.playlist != null) {
+            this.playlistPosition--;
+            if (this.playlistPosition < 0)
+                this.playlistPosition = this.playlist.size() - 1;
+            this.changeSong("resources/" + this.playlist.get(playlistPosition).getName());
+            return this.playlist.get(playlistPosition);
+        }
+        return null;
     }
 
     /**
@@ -105,7 +139,7 @@ public class MusicPlayerModel extends Observable {
      * Rewinds the clip to the start.
      */
     public void rewindToStart() {
-        if(this.hasClip()) {
+        if (this.hasClip()) {
             boolean prevRun = this.clip.isRunning();
             this.clip.stop();
             this.clip.setFramePosition(0);
@@ -121,7 +155,7 @@ public class MusicPlayerModel extends Observable {
      * @param position frame position to set song at (0 < position < this.clip.getFrameLength())
      */
     public void setSongPosition(int position) {
-        if(this.hasClip()) {
+        if (this.hasClip()) {
             boolean prevRun = this.clip.isRunning();
             this.clip.stop();
             this.clip.setFramePosition(position);
@@ -138,6 +172,7 @@ public class MusicPlayerModel extends Observable {
      */
     public void setPlaylist(List<File> playlist) {
         this.playlist = playlist;
+        this.playlistPosition = 0;
     }
 
     /**
@@ -188,7 +223,7 @@ public class MusicPlayerModel extends Observable {
      * @return true if at the end, false otherwise
      */
     public boolean atEnd() {
-        return this.clip.getFramePosition() == this.clip.getFrameLength();
+        return this.clip.getFramePosition() >= this.clip.getFrameLength() - 100;
     }
 
     /**
@@ -207,6 +242,14 @@ public class MusicPlayerModel extends Observable {
      */
     public boolean hasClip() {
         return this.clip != null;
+    }
+
+    /**
+     * TODO
+     * @return
+     */
+    public boolean hasPlaylist() {
+        return this.playlist != null;
     }
 
     /**
