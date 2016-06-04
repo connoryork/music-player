@@ -7,7 +7,9 @@ MusicPlayer supports the following controls of the current .mp3 file:
 + Rewinding to the beginning
 + Changing the file's current position to another position
 + Volume manipulation
+
 And the following for playlists
+
 + Changing to the previous song in the playlist
 + Skipping the current song and moving to the next
 
