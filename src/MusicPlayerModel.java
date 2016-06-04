@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Observable;
 
 /**
- * TODO
+ * Model file of the Model-View-Controller design pattern.
+ * Contains the variables and methods regarding the mp3 file.
+ * Used by MusicPlayerGUI.java
  *
  * @author connoryork (cxy1054@rit.edu)
  * @author mbroman (broman334@tamu.edu)
@@ -43,7 +45,7 @@ public class MusicPlayerModel extends Observable {
     /**
      * Changes the song loaded onto the clip.
      *
-     *
+     * @param mp3 file to change to currents song
      */
     public void changeSong(File mp3) {
         try {
@@ -72,7 +74,7 @@ public class MusicPlayerModel extends Observable {
     /**
      * Loads the next song in the playlist, if possible.
      *
-     * @return TODO
+     * @return File (.mp3) that was changed to the current song
      */
     public File loadNextSong() {
         if (this.playlist != null) {
@@ -87,9 +89,9 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     * TODO
+     * Loads the previous song on the playlist
      *
-     * @return TODO
+     * @return File (.mp3) that was changed to the current song
      */
     public File loadPrevSong() {
         if (this.playlist != null) {
@@ -245,8 +247,9 @@ public class MusicPlayerModel extends Observable {
     }
 
     /**
-     * TODO
-     * @return
+     * Returns whether or not there is a current playlist.
+     *
+     * @return true if has a playlist, false otherwise
      */
     public boolean hasPlaylist() {
         return this.playlist != null;

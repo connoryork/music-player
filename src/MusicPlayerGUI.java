@@ -313,6 +313,13 @@ public class MusicPlayerGUI extends Application implements Observer {
         return songSlider;
     }
 
+     /*******************************************************
+     *                                                      *
+     *  HELPER METHODS FOR MANIPULATING THE MODEL           *
+     *  AND UPDATING THE GUI                                *
+     *                                                      *
+     *******************************************************/
+
     /**
      * Loads a new song. Updates the song slider and volume slider accordingly.
      *
