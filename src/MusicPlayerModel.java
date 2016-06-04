@@ -43,11 +43,11 @@ public class MusicPlayerModel extends Observable {
     /**
      * Changes the song loaded onto the clip.
      *
-     * @param song TODO
+     *
      */
-    public void changeSong(String song) { //TODO make so it can load from outside resources
+    public void changeSong(File mp3) {
         try {
-            this.audioStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(song));
+            this.audioStream = AudioSystem.getAudioInputStream(mp3);
             this.baseFormat = audioStream.getFormat();
             this.decodeFormat = new AudioFormat(
                     AudioFormat.Encoding.PCM_SIGNED,
@@ -76,8 +76,8 @@ public class MusicPlayerModel extends Observable {
      */
     public File loadNextSong() {
         if (this.playlist != null) {
-            this.changeSong("resources/" + this.playlist.get(playlistPosition).getName());
-            File song = this.playlist.get(playlistPosition);
+            this.changeSong(this.playlist.get(this.playlistPosition));
+            File song = this.playlist.get(this.playlistPosition);
             this.playlistPosition++;
             if (this.playlistPosition >= this.playlist.size())
                 this.playlistPosition = 0;
@@ -96,8 +96,8 @@ public class MusicPlayerModel extends Observable {
             this.playlistPosition--;
             if (this.playlistPosition < 0)
                 this.playlistPosition = this.playlist.size() - 1;
-            this.changeSong("resources/" + this.playlist.get(playlistPosition).getName());
-            return this.playlist.get(playlistPosition);
+            this.changeSong(this.playlist.get(this.playlistPosition));
+            return this.playlist.get(this.playlistPosition);
         }
         return null;
     }

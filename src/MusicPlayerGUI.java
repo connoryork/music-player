@@ -321,7 +321,7 @@ public class MusicPlayerGUI extends Application implements Observer {
     public void loadSong(File songfile) {
         if (this.model.hasClip() && this.model.isRunning())
             this.model.stop();
-        this.model.changeSong("resources/" + songfile.getName());
+        this.model.changeSong(songfile);
         this.stage.setTitle(songfile.getName() + " ~ MusicPlayer");
         int MIN_VOLUME = (int) this.model.getMinVolume();
         int MAX_VOLUME = (int) this.model.getMaxVolume();
