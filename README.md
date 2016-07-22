@@ -1,6 +1,7 @@
 # MusicPlayer
 
 MusicPlayer is a JavaFX application that plays .mp3 files.
+MusicPlayer always stays on top of whatever windows ou are currently viewing, to prevent the annoyance of having to leave whatever you were looking at to adjust your music.
 MusicPlayer supports the playing of single .mp3 files and a playlist of multiple .mp3 files.
 MusicPlayer supports the following controls of the current .mp3 file:
 + Pausing and Playing
